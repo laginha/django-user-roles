@@ -26,7 +26,14 @@ class Role(object):
     A single role, eg as returned by `roles.moderator`.
     """
     
+    def is_subrole(self, other):
+        if isinstance(self, basestring):
+            other = getattr(self, other)
+        return self < other
+    
     def __cmp__(self, other):
+        if self.order == None or other.order == None:
+            return 0
         if self.order > other.order:
             return 1
         elif self.order < other.order:
@@ -43,14 +50,6 @@ class Role(object):
 
 class Roles(object):
 
-    @property
-    def choices(self):
-        """
-        Return a list of two-tuples of role names, suitable for use as the
-        'choices' argument to a model field.
-        """
-        return [(role, role) for role in self._config]
-
     def __init__(self, config=None):
         """
         By default the Roles object will be created using configuration from
@@ -59,13 +58,20 @@ class Roles(object):
         """
         self._config = config or getattr(settings, 'USER_ROLES', ())
         
-        order = 0
+        # a list of two-tuples of role names, suitable for use as the
+        # 'choices' argument to a model field.
+        self.choices = []
+        
         for item in self._config:
-            
             if isinstance(item, basestring):
                 # An item like 'manager'
-                setattr(self, item, Role(name=item, order=order))
-                order += 1
+                setattr(self, item, Role(name=item, order=None))
+                self.choices.append( (item, item) )
+            elif isinstance(item, (list, tuple)):
+                for i in range(len(item)):
+                    subitem = item[i]
+                    setattr(self, subitem, Role(name=subitem, order=i))
+                    self.choices.append( (subitem, subitem) )
             else:
                 # Anything else
                 raise ImproperlyConfigured(_INCORRECT_ARGS)
