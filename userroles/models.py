@@ -23,7 +23,9 @@ class UserRole(models.Model):
             role = getattr(self._valid_roles, name[3:], None)
             if role:
                 return self == role
-
+        role = roles.get(self.name)
+        if hasattr(role, name):
+            return getattr(role, name)
         raise AttributeError("'%s' object has no attribute '%s'" %
                               (self.__class__.__name__, name))
 

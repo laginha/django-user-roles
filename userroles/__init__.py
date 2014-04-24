@@ -26,23 +26,23 @@ class Role(object):
     A single role, eg as returned by `roles.moderator`.
     """
     
-    def is_subrole(self, other):
-        if isinstance(self, basestring):
-            other = getattr(self, other)
-        return self < other
+    def add_subrole(self, role):
+        self.subroles[ role.name ] role
     
-    def __cmp__(self, other):
-        if self.order == None or other.order == None:
-            return 0
-        if self.order > other.order:
-            return 1
-        elif self.order < other.order:
-            return -1
-        return 0
+    def subrole_of(self, role):
+        if self.parent:
+            name = subrole if isinstance(role, basestring) else role.name
+            return self.parent.name == name
+        return False
+    
+    def has_subrole(self, subrole):
+        name = subrole if isinstance(subrole, basestring) else subrole.name
+        return bool( self.subroles.get(name, None) )
 
-    def __init__(self, name, order=None):
+    def __init__(self, name, parent=None):
         self.name = name
-        self.order = order
+        self.subroles = {}
+        self.parent = parent
 
     def __unicode__(self):
         return self.name
@@ -50,6 +50,15 @@ class Role(object):
 
 class Roles(object):
 
+    def get(self, userrole):
+        return getattr(self, userrole, None)
+    
+    def add(self, name, parent=None):
+        role = Role(name=name, parent=parent)
+        setattr(self, name, role)
+        self.choices.append( (name, name) )
+        return role
+    
     def __init__(self, config=None):
         """
         By default the Roles object will be created using configuration from
@@ -57,21 +66,21 @@ class Roles(object):
         explicitly, for example, when testing.
         """
         self._config = config or getattr(settings, 'USER_ROLES', ())
-        
         # a list of two-tuples of role names, suitable for use as the
         # 'choices' argument to a model field.
         self.choices = []
         
+        def get_subroles(parent):
+            subroles = getattr(settings, parent.name.upper()+'_SUBROLES', ())
+            for i in subroles:
+                role = self.add( subroles, parent=parent )
+                parent.subroles.append( role )
+                get_subroles( role )
+        
         for item in self._config:
             if isinstance(item, basestring):
                 # An item like 'manager'
-                setattr(self, item, Role(name=item, order=None))
-                self.choices.append( (item, item) )
-            elif isinstance(item, (list, tuple)):
-                for i in range(len(item)):
-                    subitem = item[i]
-                    setattr(self, subitem, Role(name=subitem, order=i))
-                    self.choices.append( (subitem, subitem) )
+                get_subroles( self.add( item ) )
             else:
                 # Anything else
                 raise ImproperlyConfigured(_INCORRECT_ARGS)
