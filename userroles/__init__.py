@@ -27,7 +27,7 @@ class Role(object):
     """
     
     def add_subrole(self, role):
-        self.subroles[ role.name ] role
+        self.subroles[ role.name ] = role
     
     def subrole_of(self, role):
         if self.parent:
@@ -72,9 +72,9 @@ class Roles(object):
         
         def get_subroles(parent):
             subroles = getattr(settings, parent.name.upper()+'_SUBROLES', ())
-            for i in subroles:
-                role = self.add( subroles, parent=parent )
-                parent.subroles.append( role )
+            for each in subroles:
+                role = self.add( each, parent=parent )
+                parent.add_subrole( role )
                 get_subroles( role )
         
         for item in self._config:
