@@ -2,7 +2,6 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import importlib
 
-
 __version__ = '0.1.0'
 
 
@@ -30,14 +29,14 @@ class Role(object):
         self.subroles[ role.name ] = role
     
     def subrole_of(self, role):
-        if self.parent:
-            name = subrole if isinstance(role, basestring) else role.name
-            return self.parent.name == name
-        return False
+        if isinstance(role, basestring):
+            return bool(self.parent) and self.parent.name == role
+        return bool(self.parent) and self.parent.name == role.name
     
-    def has_subrole(self, subrole):
-        name = subrole if isinstance(subrole, basestring) else subrole.name
-        return bool( self.subroles.get(name, None) )
+    def has_subrole(self, role):
+        if isinstance(role, basestring):
+            return role in self.subroles
+        return role.name in self.subroles
 
     def __init__(self, name, parent=None):
         self.name = name
@@ -50,8 +49,8 @@ class Role(object):
 
 class Roles(object):
 
-    def get(self, userrole):
-        return getattr(self, userrole, None)
+    def get(self, userrole, *args):
+        return getattr(self, userrole, *args)
     
     def add(self, name, parent=None):
         role = Role(name=name, parent=parent)
@@ -71,7 +70,7 @@ class Roles(object):
         self.choices = []
         
         def get_subroles(parent):
-            subroles = getattr(settings, parent.name.upper()+'_SUBROLES', ())
+            subroles = getattr(settings, parent.name.upper()+'_ROLES', ())
             for each in subroles:
                 role = self.add( each, parent=parent )
                 parent.add_subrole( role )

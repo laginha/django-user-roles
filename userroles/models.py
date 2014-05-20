@@ -22,7 +22,7 @@ class UserRole(models.Model):
         if name.startswith('is_'):
             role = getattr(self._valid_roles, name[3:], None)
             if role:
-                return self == role
+                return self == role or self.subrole_of( role )
         role = roles.get(self.name)
         if hasattr(role, name):
             return getattr(role, name)
@@ -34,21 +34,23 @@ class UserRole(models.Model):
 
 
 def set_user_role(user, role, profile=None):
+    role_name = role if isinstance(role, basestring) else role.name
+    
     if profile:
         try:
             UserRole.objects.get(user=user).delete()
         except UserRole.DoesNotExist:
             pass
         profile.user = user
-        profile.name = role.name
+        profile.name = role_name
         profile.child = str(profile.__class__.__name__).lower()
 
     else:
         try:
             profile = UserRole.objects.get(user=user)
         except UserRole.DoesNotExist:
-            profile = UserRole(user=user, name=role.name)
+            profile = UserRole(user=user, name=role_name)
         else:
-            profile.name = role.name
+            profile.name = role_name
 
     profile.save()
