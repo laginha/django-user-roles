@@ -41,7 +41,7 @@ Add sub-roles for any of the roles defined in the `USER_ROLES` setting.
 
 ```python
 MANAGER_ROLES = (
-    'staff_manager', 'bussiness_manager'
+    'staff_manager', 'business_manager'
 )
 ```
 

@@ -46,7 +46,7 @@ USER_ROLES = (
     'client',
 )
 MANAGER_ROLES = (
-    'staff_manager', 'bussiness_manager'
+    'staff_manager', 'business_manager'
 )
 
 MIDDLEWARE_CLASSES = (
