@@ -5,16 +5,16 @@ Simple role-based user permissions for Django.
 
 django-user-roles is a simple, reusable app that allows you to create a set of user roles, which can be used to control which views each type of user has permission to view, and to customize how the site is presented to different types of user.
 
-<!--
-User roles can also be associated with differing profile classes, allowing you to store different types of user information for different user types.
--->
 
 ## Install
 
-    pip install git+https://github.com/laginha/django-user-roles
+    pip install custom-user-roles
 
 
-## Usage
+## Basic Usage
+
+
+### Settings
 
 Add `userroles` do `INSTALLED_APPS`
 
@@ -25,7 +25,7 @@ INSTALLED_APPS = (
 )
 ```
 
-and add the `USER_ROLES` setting to your `settings.py`. For example:
+Add the `USER_ROLES` setting
 
 ```python
 USER_ROLES = (
@@ -35,9 +35,16 @@ USER_ROLES = (
 )
 ```
 
-### Sub-roles
+Define your Custom User model (optional)
 
-Add sub-roles for any of the roles defined in the `USER_ROLES` setting.
+```python
+AUTH_USER_MODEL = 'custom_user.EmailUser'
+````
+
+> Tip: check [this app](https://github.com/jcugat/django-custom-user) to easily make your own custom user model
+
+
+Add subroles for any of the roles defined in the `USER_ROLES` setting (optional)
 
 ```python
 MANAGER_ROLES = (
@@ -45,7 +52,36 @@ MANAGER_ROLES = (
 )
 ```
 
-Be careful not to repeat the names in subroles and roles.
+Subroles can have sub-subroles and so on. But be careful not to repeat the names!
+
+
+### Decorator
+
+The `role_required` decorator provides similar behavior to Django's `login_required` and `permission_required` decorators.  If the user accessing the view does not have the required roles, they will be redirected to the login page.
+
+```python
+from userroles.decorators import role_required
+
+@role_required('manager', 'moderator')
+def view(request):
+    ...
+```
+
+or
+
+```python
+from userroles.decorators import role_required
+from userroles import roles
+
+@role_required(roles.manager, roles.moderator)
+def view(request):
+    ...
+```
+
+If user has a subrole of the required role, it passes de user test as well!
+
+
+### Utils
 
 #### subrole_of
 
@@ -110,28 +146,3 @@ user.role.is_moderator
 user.role.is_staff_manager
 ```
 
-
-## Decorator
-
-The `role_required` decorator provides similar behavior to Django's `login_required` and `permission_required` decorators.  If the user accessing the view does not have the required roles, they will be redirected to the login page.
-
-```python
-from userroles.decorators import role_required
-
-@role_required('manager', 'moderator')
-def view(request):
-    ...
-```
-
-or
-
-```python
-from userroles.decorators import role_required
-from userroles import roles
-
-@role_required(roles.manager, roles.moderator)
-def view(request):
-    ...
-```
-
-If user has a subrole of the required role, it passes de user test as well!
