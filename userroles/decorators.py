@@ -20,6 +20,8 @@ def role_required(*user_roles):
     def check_role(user):
         try:
             user_role = getattr(user, 'role', None)
+            if not user_role:
+                return False
             for each in required_roles:
                 if user_role == each or user_role.subrole_of( each ):
                     return True

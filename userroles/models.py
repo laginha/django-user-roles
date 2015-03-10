@@ -1,10 +1,10 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 from userroles import roles
 
 
 class UserRole(models.Model):
-    user = models.OneToOneField(User, related_name='role')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='role')
     name = models.CharField(max_length=100, choices=roles.choices)
     child = models.CharField(max_length=100, blank=True)
     _valid_roles = roles
@@ -33,24 +33,13 @@ class UserRole(models.Model):
         return self.name
 
 
-def set_user_role(user, role, profile=None):
+def set_user_role(user, role):
     role_name = role if isinstance(role, basestring) else role.name
-    
-    if profile:
-        try:
-            UserRole.objects.get(user=user).delete()
-        except UserRole.DoesNotExist:
-            pass
-        profile.user = user
-        profile.name = role_name
-        profile.child = str(profile.__class__.__name__).lower()
-
+    try:
+        profile = UserRole.objects.get(user=user)
+    except UserRole.DoesNotExist:
+        profile = UserRole(user=user, name=role_name)
     else:
-        try:
-            profile = UserRole.objects.get(user=user)
-        except UserRole.DoesNotExist:
-            profile = UserRole(user=user, name=role_name)
-        else:
-            profile.name = role_name
-
+        profile.name = role_name
     profile.save()
+

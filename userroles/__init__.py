@@ -1,23 +1,5 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import importlib
-
-__version__ = '0.1.0'
-
-
-_IMPORT_FAILED = "Could not import role profile '%s'"
-_INCORRECT_ARGS = "USER_ROLES should be a list of strings and/or two-tuples"
-
-
-def _import_class_from_string(class_path):
-    """
-    Given a string like 'foo.bar.Baz', returns the class it refers to.
-    If the string is empty, return None, rather than raising an import error.
-    """
-    if not class_path:
-        return None
-    module_path, class_name = class_path.rsplit('.', 1)
-    return getattr(importlib.import_module(module_path), class_name)
 
 
 class Role(object):
