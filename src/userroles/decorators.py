@@ -26,7 +26,6 @@ def role_required(*user_roles):
                 if user_role == each or user_role.subrole_of( each ):
                     return True
             return False
-            # return getattr(user, 'role', None) in required_roles
         except UserRole.DoesNotExist:
             return False
     return user_passes_test(check_role)
