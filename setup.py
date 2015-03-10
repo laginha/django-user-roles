@@ -1,74 +1,24 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from setuptools import setup
-import re
-import os
-import sys
-
-
-name = 'django-user-roles'
-package = 'userroles'
-description = 'Simple role-based user permissions for Django.'
-url = 'http://github.com/dabapps/django-user-roles'
-author = 'Tom Christie'
-email = 'tom@tomchristie.com'
-license = 'BSD'
-install_requires = []
-
-
-def get_version(package):
-    """
-    Return package version as listed in `__version__` in `init.py`.
-    """
-    init_py = open(os.path.join(package, '__init__.py')).read()
-    version_regex = "^__version__ = ['\"]([^'\"]+)['\"]"
-    return re.search(version_regex, init_py, re.MULTILINE).group(1)
-
-
-def get_packages(package):
-    """
-    Return root package and all sub-packages.
-    """
-    return [dirpath
-            for dirpath, dirnames, filenames in os.walk(package)
-            if os.path.exists(os.path.join(dirpath, '__init__.py'))]
-
-
-def get_package_data(package):
-    """
-    Return all files under the root package, that are not in a
-    package themselves.
-    """
-    walk = [(dirpath.replace(package + os.sep, '', 1), filenames)
-            for dirpath, dirnames, filenames in os.walk(package)
-            if not os.path.exists(os.path.join(dirpath, '__init__.py'))]
-
-    filepaths = []
-    for base, filenames in walk:
-        filepaths.extend([os.path.join(base, filename)
-                          for filename in filenames])
-    return {package: filepaths}
-
-
-if sys.argv[-1] == 'publish':
-    os.system("python setup.py sdist upload")
-    args = {'version': get_version(package)}
-    print "You probably want to also tag the version now:"
-    print "  git tag -a %(version)s -m 'version %(version)s'" % args
-    print "  git push --tags"
-    sys.exit()
-
+from setuptools import setup, find_packages
 
 setup(
-    name=name,
-    version=get_version(package),
-    url=url,
-    license=license,
-    description=description,
-    author=author,
-    author_email=email,
-    packages=get_packages(package),
-    package_data=get_package_data(package),
-    install_requires=install_requires
+    name             = 'custom-user-roles',
+    version          = '1.0.0',
+    # original author = 'Tom Christie'
+    # original author_email  = 'tom@tomchristie.com'
+    author           = "Diogo Laginha",
+    author_email     = "diogo.laginha.machado@gmail.com",
+    url              = 'https://github.com/laginha/django-user-roles',
+    description      = "Simple role-based user permissions for Django.",
+    packages         = find_packages(where='src'),
+    package_dir      = {'': 'src'},
+    install_requires = ['django', 'milkman'],
+    extras_require   = {},
+    zip_safe         = False,
+    license          = 'MIT',
+    classifiers      = [
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 2',
+        'Intended Audience :: Developers',
+    ]
 )
+
