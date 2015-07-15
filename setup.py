@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name             = 'custom-user-roles',
-    version          = '1.0.0',
+    version          = '1.1.0',
     # original author = 'Tom Christie'
     # original author_email  = 'tom@tomchristie.com'
     author           = "Diogo Laginha",
